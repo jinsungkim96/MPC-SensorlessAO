@@ -1,6 +1,6 @@
 authors:
-  - family-names: Jinsung
-    given-names: Kim
+  - family-names: Kim
+    given-names: Jinsung
 cff-version: 1.2.0
 message: "The MATLAB code leading for model predictive control of time-varying aberrations for sensorless adaptive optics."
 title: "Comparison of QP Solvers for computational feasibility and correction performace of MPC"
