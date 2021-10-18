@@ -1,6 +1,6 @@
 authors:
-  - family-names: Druskat
-    given-names: Stephan
+  - family-names: Jinsung
+    given-names: Kim
 cff-version: 1.2.0
-message: "If you use this software, please cite it using these metadata."
-title: "My Research Software"
+message: "The MATLAB code leading for model predictive control of time-varying aberrations for sensorless adaptive optics."
+title: "Comparison of QP Solvers for computational feasibility and correction performace of MPC"
