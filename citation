@@ -1,9 +1,9 @@
 @software{Lisa_My_Research_Software_2017,
-  author = {Lisa, Mona and Bot, Hew},
+  author = {Kim, Jinsung and Hur, Hwan},
   doi = {10.5281/zenodo.1234},
-  month = {12},
-  title = {{My Research Software}},
+  month = {10},
+  title = {{MATLAB code of model predictive control for sensorless adaptive optics}},
   url = {https://github.com/github/linguist},
-  version = {2.0.4},
-  year = {2017}
+  version = {1.0.0},
+  year = {2021}
 }
