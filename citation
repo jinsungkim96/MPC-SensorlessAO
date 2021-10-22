@@ -7,7 +7,7 @@ authors:
 - family-names: "Hur"
   given-names: "Hwan"
   orcid: "https://orcid.org/0000-0000-0000-0000"
-title: "Model Predictive Control (MPC) of Time-varying Aberrations for Sensorless Adaptive Optics Simulation Package in MATLAB."
+title: "Model Predictive Control Simulation Package for Sensorless Adaptive Optics in MATLAB."
 version: 1.0.0
 date-released: 2021-10-22
 url: "https://github.com/rlawlstjd960/MPC-SensorlessAO"
