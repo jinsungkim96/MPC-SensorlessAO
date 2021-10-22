@@ -1,6 +1,5 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-type: article
 authors:
 - family-names: "Kim"
   given-names: "Jinsung"
@@ -10,6 +9,6 @@ authors:
   orcid: "https://orcid.org/0000-0000-0000-0000"
 title: "Model Predictive Control Simulation Package for Sensorless Adaptive Optics in MATLAB"
 version: 1.0.0
-month: 9
-year : 2021
+month: 10
+year: 2021
 url: "https://github.com/rlawlstjd960/MPC-SensorlessAO"
