@@ -1,14 +1,13 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: "Lisa"
-  given-names: "Mona"
+- family-names: "Kim"
+  given-names: "Jinsung"
+  orcid: "https://orcid.org/0000-0002-5989-8391"
+- family-names: "Hur"
+  given-names: "Hwan"
   orcid: "https://orcid.org/0000-0000-0000-0000"
-- family-names: "Bot"
-  given-names: "Hew"
-  orcid: "https://orcid.org/0000-0000-0000-0000"
-title: "My Research Software"
-version: 2.0.4
-doi: 10.5281/zenodo.1234
-date-released: 2017-12-18
-url: "https://github.com/github/linguist"
+title: "Model Predictive Control (MPC) of Time-varying Aberrations for Sensorless Adaptive Optics Simulation Package in MATLAB."
+version: 1.0.0
+date-released: 2021-10-22
+url: "https://github.com/rlawlstjd960/MPC-SensorlessAO"
