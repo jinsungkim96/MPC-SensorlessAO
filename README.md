@@ -12,3 +12,4 @@ Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Opt
 ## References
 [[1]] Diederik P. Kingma, Jimmy Ba. "Adam: A Method for Stochastic
          Optimization", ICLR 2015. [https://arxiv.org/abs/1412.6980](https://arxiv.org/abs/1412.6980)
+[1]: https://arxiv.org/abs/1412.6980
