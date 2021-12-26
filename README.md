@@ -12,4 +12,9 @@ Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Opt
 ## References
 [[1]] Diederik P. Kingma, Jimmy Ba. "Adam: A Method for Stochastic
          Optimization", ICLR 2015. [https://arxiv.org/abs/1412.6980](https://arxiv.org/abs/1412.6980)
+
+[[2]] Geoffrey E Hinton, Nitish Srivastava, Alex Krizhevsky, Ilya Sutskever, and Ruslan R. Salakhutdinov. "Improving neural networks by preventing co-adaptation of feature detectors." arXiv preprint. [https://arxiv.org/abs/1207.0580](https://arxiv.org/abs/1207.0580)
+
+
 [1]: https://arxiv.org/abs/1412.6980
+[2]: https://arxiv.org/abs/1207.0580
