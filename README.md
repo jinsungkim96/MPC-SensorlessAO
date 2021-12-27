@@ -1,5 +1,5 @@
 # MPC-SensorlessAO
-This is a `Matlab` implementation of the Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Optics from Jinsung~Kim et al. [[1]], designed for Sensorless adaptive optics. It maintains estimates of the moments of the gradient independently for each parameter.
+This is a `Matlab` implementation of the Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Optics from Jinsung~Kim et al. [[1]], designed for Sensorless adaptive optics.
 
 <img src="images/SensorlessAO_overview.eps" />
 <img src="images/block_diagram.png" />
@@ -66,12 +66,44 @@ end
 To determine the VAR model, any system identification method such as time-series, machine learning, and extrapolation can be used.
 In this study, we designed an AR model based on a time-series method.
 An open-loop wavefront dataset ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\{x_t[k]|k=1,\cdots,t_{\textrm{train}}%20\}) was used to identify the model parameters ![equation](https://latex.codecogs.com/gif.latex?%5Cinline%20A_i):
-```math
-SE = \frac{\sigma}{\sqrt{n}}
-```
-
-
 ```matlab
+num_data = size(ad_acc,1);
+
+ad_acc = ad_acc(1:num_data,2:end);
+
+num_train = 1000; % number of training set
+num_valid = 500; % number of validation set
+num_test = 500; % number of test set
+
+PN = 2; % order of VAR model
+AA = []; % model of training set
+BB = [];
+
+for i=PN+1:num_train
+    for j=1:PN
+        AA(i-PN,size(ad_acc,2)*(j-1)+1:size(ad_acc,2)*j) = ad_acc(i-j,:);
+    end
+    BB(i-PN,:) = ad_acc(i,:);
+end
+
+PARA = (AA'*AA)\AA'*BB;
+
+A1 = PARA(1:size(ad_acc,2),:);
+A2 = PARA(1+size(ad_acc,2):2*size(ad_acc,2),:);
+
+BB_ts_train = AA*PARA;
+
+% test set
+AA_test = []; % model of training set
+BB_test = [];
+for i=1:num_test % i=(num_train-PN)+1:(num_train-PN+1)+num_test
+    for j=1:PN
+        AA_test(i,size(ad_acc,2)*(j-1)+1:size(ad_acc,2)*j) = ad_acc(i+num_train-j,:);
+    end
+    BB_test(i,:) = ad_acc(i+num_train,:);
+end
+
+BB_ts_test = AA_test*PARA;
 
 ```
 
