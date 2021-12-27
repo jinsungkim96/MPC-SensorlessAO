@@ -1,5 +1,4 @@
 # MPC-SensorlessAO
-# Adam optimiser
 This is a `Matlab` implementation of the Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Optics from Jinsung~Kim et al. [[1]], designed for Sensorless adaptive optics. It maintains estimates of the moments of the gradient independently for each parameter.
 
 ##  Generating Time-varying Phase aberration
