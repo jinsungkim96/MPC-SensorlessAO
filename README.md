@@ -65,7 +65,7 @@ end
 ##  Model Identification based on Time-series method
 To determine the VAR model, any system identification method such as time-series, machine learning, and extrapolation can be used.
 In this study, we designed an AR model based on a time-series method.
-An open-loop wavefront dataset {x_t[k]|k = 1, \cdots, t_train} was used to identify the model parameters ![equation](https://latex.codecogs.com/gif.latex?%5Cinline%20A_i):
+An open-loop wavefront dataset ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\{x_t[k]|k=1,\cdots,t_{\textrm{train}}%20\}) was used to identify the model parameters ![equation](https://latex.codecogs.com/gif.latex?%5Cinline%20A_i):
 ```math
 SE = \frac{\sigma}{\sqrt{n}}
 ```
