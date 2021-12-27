@@ -16,8 +16,7 @@ clear;clc;close all;
 addpath(genpath('D:\Users\Her\Documents\MATLAB\AO\4F-Optical-Correlator-Simulation-kim\OOMAO-master'))
 
 samplingFreq = 200; % turbulence sampling frequency
-nSimSteps = 2000;
-T_final = nSimSteps;
+nSimSteps = 2000; % total number of phase screen
 nPolynomials = 28; % number of zernike modes (radial number = 6)
 
 D = 1; % telescope diameter [m]
@@ -53,13 +52,10 @@ sprintf('Calculating wavefront for %d steps ...',nSimSteps);
 
 phase = []; time_phase = [];
 for iSimStep=1:nSimSteps
-    tic;
     +ngs;
     +tel;
-    phase(:,:,iSimStep) = ngs.meanRmPhase; % time-varying phase aberrations (mainly frozen-flow model)
+    phase(:,:,iSimStep) = ngs.meanRmPhase; % time-varying phase aberrations for each sampling time
     time_phase(iSimStep) = ngs.timeStamp;
-    zern2 = zern.\(ngs.meanRmPhase); % zernike coefficient generation
-    toc;
 end
 
 % Fitting the Zernike coefficients constituting the time-varying phase aberrations
@@ -125,8 +121,18 @@ end
 BB_ts_test = AA_test*PARA;
 
 ```
+## The influence matrix of Deformable Mirror (DM) generation
+The influence matrix for each actuators was designed as a Gaussian influence function: 
+![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\begin{equation*}I_j(\chi)%20=%20\textrm{exp}\left(\textrm{ln}(c)%20\displaystyle\frac{(\chi-\chi_{0,j})^2}{d^2}%20\right)\end{equation*})
+If the DM is operated as a modal method, the corrected wavefront and influence functions are decomposed into a set of Zernike polynomials:
+![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\begin{equation*}I_j(\chi)%20=%20\sum_{r=1}^{n}%20b_{r,j}%20Z_r(\chi)%20\;%20\Leftrightarrow%20%20\;%20\mathcal{I}%20=%20\mathcal{Z}B\end{equation*})
+Therefore, the influence matrix can be obtained by the least-squares method ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\begin{equation}B%20=%20{\mathcal{Z}}^{\dagger}%20{\mathcal{I}}\end{equation})
+
+```matlab
 
 
+
+```
 
 ##  Model Predictive Control Simulation
 ```matlab
