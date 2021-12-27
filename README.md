@@ -144,6 +144,45 @@ mag_conv_20 = 3.174802103932926;
 
 phase = phase .* mag_conv_10;
 ad_acc = ad_acc .* mag_conv_10;
+
+A1 = A1'; % input_data에 저장된 A가 x*A 형태로 쓰였기 때문에 변환 필요
+A2 = A2';
+
+% piston element is removed
+B(1,:) = []; A_s(:,1) = []; A_s_est(:,1) = []; ad_acc(:,1) = []; 
+```
+### Setup the simulation parameters
+``` matlab
+nx = size(A1,1); % number of state
+nu = size(B,2); % number of input
+p = size(A_s,1); % number of measurements   
+nx_est = size(A_s_est,2);
+
+n_mode = 6; % Radial order ofZernike mode
+N = 2; % Prediction horizon for MPC
+T_final = size(phase,3) - num_train - num_test; % Terminal time for simulation
+T_settle = 1.0e-3;
+T_s = 0.1e-3; % sampling time of MPC Simulation
+T_s_tur = 5e-3;
+
+% J = U'*H*U + r'*U + c
+Q = (1.5e+4)*eye(nx,nx); % weighting matrix for error state
+P = (1e+0)*Q; % weighting matrix for terminal error 
+R = (1e+0)*eye(nu,nu);% weighting matrix for cost function
+
+coeff_a = 0.047275; coeff_b = 2.709264; coeff_c = 0; % Unit change parameters (Voltage to Deflection)
+
+u_min = -28*ones(nu,1); % input box constraint [rad]
+u_max = 28*ones(nu,1);  % 28 [rad] -> 200 [V]
+
+du_min = -0.2121*ones(nu,1); % ramp-rate constraint [rad]
+du_max = 0.2121*ones(nu,1);
+
+U_min = repmat(u_min,N,1);
+U_max = repmat(u_max,N,1);
+
+dU_min = repmat(du_min,N,1);
+dU_max = repmat(du_max,N,1);
 ```
 
 
