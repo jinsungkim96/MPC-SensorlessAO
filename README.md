@@ -34,7 +34,7 @@ f_r0 = [0.7, 0.1, 0.2]./25; % Fractional r0
 atm = atmosphere(photometry.V,r0,L0,'fractionnalR0',f_r0,'altitude',h,'windSpeed',v0,'windDirection',vD); % atmosphere
 
 % telescope setting
-nL = 512; % number of lenslet
+nL = 128; % number of lenslet
 nPx = 1; % number or pixel per lenslet
 nRes = nL*nPx; % resolution
 xaxis = 1:nRes;
@@ -61,7 +61,26 @@ for iSimStep=1:nSimSteps
     zern2 = zern.\(ngs.meanRmPhase); % zernike coefficient generation
     toc;
 end
+
+% Fitting the Zernike coefficients constituting the time-varying phase aberrations
+x = (-(nL-1):2:(nL-1))/(nL-1);
+[X,Y] = meshgrid(x);
+[theta,r] = cart2pol(X,Y);    % convert to polar coordinate
+is_in = r <= max(abs(x));
+
+r = r(is_in);
+theta = theta(is_in);
+
+N = 6; % order of zernike mode
+
+ad_acc = []; 
+for j=1:size(phase,3)
+    z = squeeze(phase(:,:,j)); % Unit : [rad]
+    [ad_new,nm_new] = zernmodfit(r,theta,z(is_in),N); % Modified Zernike Decomposition
+    ad_acc = [ad_acc; ad_new(:,1)']; % Zernike coefficients constituting the time-varying phase
+end
 ```
+
 ##  Model Identification based on Time-series method
 To determine the VAR model, any system identification method such as time-series, machine learning, and extrapolation can be used.
 In this study, we designed an AR model based on a time-series method.
