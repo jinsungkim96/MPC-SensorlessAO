@@ -164,6 +164,9 @@ end
 legend('Predicted','Actual')
 
 ```
+
+<img src="images/result1_validation.png" />
+
 ## The influence matrix of Deformable Mirror (DM) generation
 The influence matrix for each actuators was designed as a Gaussian influence function: 
 ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20I_j(\chi)%20=%20\textrm{exp}\left(\textrm{ln}(c)%20\displaystyle\frac{(\chi-\chi_{0,j})^2}{d^2}%20\right))
