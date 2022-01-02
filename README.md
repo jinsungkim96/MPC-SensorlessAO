@@ -166,7 +166,7 @@ legend('Predicted','Actual')
 ```
 ## The influence matrix of Deformable Mirror (DM) generation
 The influence matrix for each actuators was designed as a Gaussian influence function: 
-![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\begin{equation*}I_j(\chi)%20=%20\textrm{exp}\left(\textrm{ln}(c)%20\displaystyle\frac{(\chi-\chi_{0,j})^2}{d^2}%20\right)\end{equation*})
+![equation](https://latex.codecogs.com/png.image?\dpi{110}%20I_j(\chi)%20=%20\textrm{exp}\left(\textrm{ln}(c)%20\displaystyle\frac{(\chi-\chi_{0,j})^2}{d^2}%20\right))
 If the DM is operated as a modal method, the corrected wavefront and influence functions are decomposed into a set of Zernike polynomials:
 ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\begin{equation*}I_j(\chi)%20=%20\sum_{r=1}^{n}%20b_{r,j}%20Z_r(\chi)%20\;%20\Leftrightarrow%20%20\;%20\mathcal{I}%20=%20\mathcal{Z}B\end{equation*})
 Therefore, the influence matrix can be obtained by the least-squares method ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\begin{equation}B%20=%20{\mathcal{Z}}^{\dagger}%20{\mathcal{I}}\end{equation})
