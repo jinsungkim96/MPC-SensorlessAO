@@ -22,7 +22,7 @@ To illustrate a complex environment such as the real-world atmosphere, we design
 
 ```matlab
 clear;clc;close all;
-addpath(genpath('D:\Users\Her\Documents\MATLAB\AO\4F-Optical-Correlator-Simulation-kim\OOMAO-master'))
+addpath(genpath('.\OOMAO-master'))
 
 samplingFreq = 200; % turbulence sampling frequency
 nSimSteps = 2000; % total number of phase screen
@@ -115,17 +115,52 @@ A2 = PARA(1+size(ad_acc,2):2*size(ad_acc,2),:);
 
 BB_ts_train = AA*PARA;
 
-% test set
-AA_test = []; % model of training set
-BB_test = [];
-for i=1:num_test % i=(num_train-PN)+1:(num_train-PN+1)+num_test
+% validation set
+AA_valid = []; % model of validation set
+BB_valid = [];
+for i=1:num_test
     for j=1:PN
-        AA_test(i,size(ad_acc,2)*(j-1)+1:size(ad_acc,2)*j) = ad_acc(i+num_train-j,:);
+        AA_valid(i,size(ad_acc,2)*(j-1)+1:size(ad_acc,2)*j) = ad_acc(i+num_train-j,:);
     end
-    BB_test(i,:) = ad_acc(i+num_train,:);
+    BB_valid(i,:) = ad_acc(i+num_train,:);
 end
 
-BB_ts_test = AA_test*PARA;
+BB_ts_valid = AA_valid*PARA;
+
+
+ad_diff_test = BB_ts_valid - BB_valid;
+
+RMSE_valid = []; RRMSE_valid = [];
+for j=1:size(ad_acc,2)
+    RMSE_valid = [RMSE_valid; sqrt(mean((BB_ts_valid(:,j) - BB_valid(:,j)).^2))];
+    RRMSE_valid = [RRMSE_valid; RMSE_valid(j,1)/(max(BB_valid(:,j)) - min(BB_valid(:,j)))];
+end
+
+RMSE_valid = [0; RMSE_valid]; RRMSE_valid = [0; RRMSE_valid];
+
+% Compare the zernike coefficients of validation set between original and generation via PARA
+BB_valid = [zeros(size(BB_valid,1),1) BB_valid];
+BB_ts_valid = [zeros(size(BB_ts_valid,1),1) BB_ts_valid];
+
+BB_valid = [zeros(num_train,size(BB_valid,2)); BB_valid];
+BB_ts_valid = [zeros(num_train,size(BB_ts_valid,2)); BB_ts_valid];
+
+for i=1:nx
+    j = i;
+    figure(15)
+    subplot(4,7,i)
+    hold on
+    plot(BB_ts_valid(:,j),'b-','LineWidth',1.5)
+    plot(BB_valid(:,j),'r--','LineWidth',1.5)
+    hold off
+    axis square
+    title(['\alpha_{k}(' num2str(j) ')'])
+    xlabel('Time index, k')
+    xlim([(num_train + 1) (num_train + num_test)])
+    ylim([-2 2])
+    set(gca,'FontSize',15)
+end
+legend('Predicted','Actual')
 
 ```
 ## The influence matrix of Deformable Mirror (DM) generation
