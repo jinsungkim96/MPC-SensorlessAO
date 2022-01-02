@@ -186,7 +186,6 @@ m = m1^2; % total number of actuators
 
 n = 6; % order of zernike mode -> total 28 modes
 nx = (n+1)*(n+2)/2;
-% n = 12; % order of zernike mode -> total 91 modes
 
 d = D/(m1-1); % distance between actuators in pupil plane
 
@@ -220,15 +219,42 @@ for i=1:m1
     end
 end
 
+% pupil plane
+len = 512; % number of pixels in the array
+cen = len/2 + 1;
+df = 1/(len*dx); % spacing in the spatial frequency domain (cycles/m)
 
+xaxis = ((-len/2):(len/2-1))*dx;
+yaxis = -xaxis;
 
+[XX,YY] = meshgrid(xaxis,yaxis);  %2-D arrays hold x location and fy location of all points
 
+N = len-1;
+x = (-N:2:N)/N;
+[X,Y] = meshgrid(x);
+[theta,r] = cart2pol(X,Y);    % convert to polar coordinate
+is_in = r <= max(abs(x));
+% z(~is_in) = nan;
+r = r(is_in);
+theta = theta(is_in);
 
+[t1,max_idx] = min(abs(xaxis_dm - xaxis(end)));
+[t2,min_idx] = min(abs(xaxis_dm - xaxis(1)));
 
+B_pupil = zeros(len,len,m); B_pupil_isin = zeros(size(r,1),m);
+for t=1:size(B_dm,3)
+    B_pupil(:,:,t) = B_dm(min_idx:max_idx,min_idx:max_idx,t);
+    temp = B_pupil(:,:,t);
+    B_pupil_isin(:,t) = temp(is_in);
+end
 
+% Fitted by Zernike polynomials
+load("./Zs.mat") % load Zernike polynomials
 
+Zs_new = reshape(Zs,size(Zs,1),len^2)'; 
+B_pupil_new = reshape(B_pupil,len^2,size(B_pupil,3));
 
-
+B_act = pinv(Zs_new'*Zs_new)*Zs_new'*B_pupil_new;
 ```
 
 ##  Model Predictive Control Simulation
