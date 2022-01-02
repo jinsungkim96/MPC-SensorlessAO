@@ -10,6 +10,8 @@ The reflected beam with residual wavefront aberration ![equation](https://latex.
 The estimator determines the Zernike coefficient constituting ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\phi_{\textrm{res}}) without using a wavefront sensor, based on the approximate model.
 The controller computes the applied voltage to each actuator of the DM to correct the aberration of the newly incoming light.
 
+The block diagram for `Matlab` simulation is represented as follow. This repository describes each block component.
+
 <img src="images/block_diagram.png" />
 
 
