@@ -379,52 +379,6 @@ zd_dist = 3;
 zd_list = (-zd_dist:zd_dist:zd_dist); % [-3, 0, 3]; % phase diversity
 ```
 
-### Make pixel array for image plane and pupil plane
-```matlab
-% y_ref generation by FFT2
-len = 512; % number of pixels in the array
-mag = 1; % FFT magnification
-res = len*mag; % resolution of FFT 
-cen = len/2 + 1;
-dx = 6.5e-6; %0.1e-6;   % pixel spacing (m)
-df = 1/(len*dx); % spacing in the spatial frequency domain (cycles/m)
-wavelength = 532.0e-9;   % meter
-unit_change = wavelength/(2*pi)*1e+9; % [rad] to [nm]
-
-xaxis = ((-len/2):(len/2-1))*dx;
-yaxis = -xaxis;
-xaxis_res = ((-res/2):(res/2-1))*dx/mag;
-yaxis_res = -xaxis_res;
-
-%%
-x = (-(len-1):2:(len-1))/(len-1);
-[X,Y] = meshgrid(x);
-[theta,r] = cart2pol(X,Y);    % convert to polar coordinate
-is_in = r <= max(abs(x));
-r = r(is_in);
-theta = theta(is_in);
-
-range_min = find(abs(xaxis_res-(-1.0e-4)) < 3e-6, 1, 'first');
-range_max = find(abs(xaxis_res-(+1.0e-4)) < 3e-6, 1, 'last');
-diff = (range_max - range_min + 1);
-AU = 1e+12;
-
-fxaxis = ((-len/2):(len/2-1))*df;
-fyaxis = -fxaxis;
-[FX,FY] = meshgrid(fxaxis,fyaxis);  %2-D arrays hold fx location and fy location of all points
-freq_rad = sqrt(FX.^2 + FY.^2);
-maxfreq = (len/2-1)*df;
-
-pupil_radius = 1.0*maxfreq; %NA / wavelength % 1.0*maxfreq; % radius of the pupil, inverse microns % (Hanser, 2004) doi.org/10.1111/j.0022-2720.2004.01393.x
-pupil_area = pi*pupil_radius^2; % pupil area
-pupil = double(freq_rad <= pupil_radius); % pin-hole
-
-idx2 = 5; % Defocus (diversity function) index of Zernike polynomials
-
-zd_dist = 3; % phase diversiy
-zd_list = (-zd_dist:zd_dist:zd_dist); % [-3, 0, 3]
-```
-
 ### MPC Simulation
 ```matlab
 % Design matrix generation for Linear MPC
