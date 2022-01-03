@@ -94,12 +94,12 @@ where ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20k) represents
 
 To determine the VAR model, any system identification method such as time-series, machine learning, and extrapolation can be used.
 In this study, we designed an AR model based on a time-series method.
-An open-loop wavefront dataset ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\{x_t[k]|k=1,\cdots,t_{\textrm{train}}%20\}) was used to identify the model parameters ![equation](https://latex.codecogs.com/gif.latex?%5Cinline%20A_i):
+An open-loop wavefront dataset ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\{x_t[k]|k=1,\cdots,t_{\textrm{train}}%20\}) was used to identify the model parameters ![equation](https://latex.codecogs.com/gif.latex?%5Cinline%20A_i)
 
 ```matlab
 num_data = size(ad_acc,1);
 
-ad_acc = ad_acc(1:num_data,2:end);
+ad_acc(:,1) = []; % piston element is removed
 
 num_train = 1000; % number of training set
 num_valid = 500; % number of validation set
@@ -118,8 +118,8 @@ end
 
 PARA = (AA'*AA)\AA'*BB;
 
-A1 = PARA(1:size(ad_acc,2),:);
-A2 = PARA(1+size(ad_acc,2):2*size(ad_acc,2),:);
+A1 = (PARA(1:size(ad_acc,2),:))';
+A2 = (PARA(1+size(ad_acc,2):2*size(ad_acc,2),:))';
 
 BB_ts_train = AA*PARA;
 
@@ -153,7 +153,7 @@ BB_ts_valid = [zeros(size(BB_ts_valid,1),1) BB_ts_valid];
 BB_valid = [zeros(num_train,size(BB_valid,2)); BB_valid];
 BB_ts_valid = [zeros(num_train,size(BB_ts_valid,2)); BB_ts_valid];
 
-for i=1:nx
+for i=1:size(ad_acc,2)
     j = i;
     figure(15)
     subplot(4,7,i)
@@ -169,7 +169,6 @@ for i=1:nx
     set(gca,'FontSize',15)
 end
 legend('Predicted','Actual')
-
 ```
 
 <img src="images/result1_validation.png" />
