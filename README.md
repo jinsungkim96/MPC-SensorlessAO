@@ -254,7 +254,7 @@ load("./Zs.mat") % load Zernike polynomials
 Zs_new = reshape(Zs,size(Zs,1),len^2)'; 
 B_pupil_new = reshape(B_pupil,len^2,size(B_pupil,3));
 
-B_act = pinv(Zs_new'*Zs_new)*Zs_new'*B_pupil_new;
+B = pinv(Zs_new'*Zs_new)*Zs_new'*B_pupil_new; % Influence matrix
 ```
 
 ##  Model Predictive Control Simulation
@@ -276,22 +276,42 @@ B(1,:) = []; A_s(:,1) = []; A_s_est(:,1) = []; ad_acc(:,1) = [];
 ```
 ### Setup the simulation parameters
 ``` matlab
+load("./model_approx.mat") % load first-order approximation model
+load("./SNR_10.mat") % load measurement noise (SNR = 10 [dB])
+sample = 1;
+
+mag_conv_5 = 1;
+mag_conv_10 = 1.781797436291855;
+mag_conv_15 = 2.498049532979032;
+mag_conv_20 = 3.174802103932926;
+
+phase = phase .* mag_conv_10;
+ad_acc = ad_acc .* mag_conv_10;
+
+% A = A'; % VAR(1) model
+A1 = A1'; % input_data에 저장된 A가 x*A 형태로 쓰였기 때문에 변환 필요
+A2 = A2';
+
+% piston element is removed
+B(1,:) = []; A_s(:,1) = [];
+
 nx = size(A1,1); % number of state
 nu = size(B,2); % number of input
 p = size(A_s,1); % number of measurements   
-nx_est = size(A_s_est,2);
 
-n_mode = 6; % Radial order ofZernike mode
-N = 2; % Prediction horizon for MPC
-T_final = size(phase,3) - num_train - num_test; % Terminal time for simulation
+n_mode = 6; % number of zernike modes
+N = 2; % prediction horizon for MPC
+T_final = 500; % size(phase,3) - num_train - num_test;
 T_settle = 1.0e-3;
 T_s = 0.1e-3; % sampling time of MPC Simulation
 T_s_tur = 5e-3;
 
-% J = U'*H*U + r'*U + c
+%% J = U'*H*U + r'*U + c
 Q = (1.5e+4)*eye(nx,nx); % weighting matrix for error state
 P = (1e+0)*Q; % weighting matrix for terminal error 
 R = (1e+0)*eye(nu,nu);% weighting matrix for cost function
+
+% SNR = 10; % the magnitude of desired SNR [db]
 
 coeff_a = 0.047275; coeff_b = 2.709264; coeff_c = 0; % Unit change parameters (Voltage to Deflection)
 
@@ -306,6 +326,7 @@ U_max = repmat(u_max,N,1);
 
 dU_min = repmat(du_min,N,1);
 dU_max = repmat(du_max,N,1);
+
 ```
 
 
@@ -357,12 +378,60 @@ idx2 = 5;
 zd_dist = 3;
 zd_list = (-zd_dist:zd_dist:zd_dist); % [-3, 0, 3]; % phase diversity
 ```
-### MPC Simulation for total simulation time
+
+### Make pixel array for image plane and pupil plane
+```matlab
+% y_ref generation by FFT2
+len = 512; % number of pixels in the array
+mag = 1; % FFT magnification
+res = len*mag; % resolution of FFT 
+cen = len/2 + 1;
+dx = 6.5e-6; %0.1e-6;   % pixel spacing (m)
+df = 1/(len*dx); % spacing in the spatial frequency domain (cycles/m)
+wavelength = 532.0e-9;   % meter
+unit_change = wavelength/(2*pi)*1e+9; % [rad] to [nm]
+
+xaxis = ((-len/2):(len/2-1))*dx;
+yaxis = -xaxis;
+xaxis_res = ((-res/2):(res/2-1))*dx/mag;
+yaxis_res = -xaxis_res;
+
+%%
+x = (-(len-1):2:(len-1))/(len-1);
+[X,Y] = meshgrid(x);
+[theta,r] = cart2pol(X,Y);    % convert to polar coordinate
+is_in = r <= max(abs(x));
+r = r(is_in);
+theta = theta(is_in);
+
+range_min = find(abs(xaxis_res-(-1.0e-4)) < 3e-6, 1, 'first');
+range_max = find(abs(xaxis_res-(+1.0e-4)) < 3e-6, 1, 'last');
+diff = (range_max - range_min + 1);
+AU = 1e+12;
+
+fxaxis = ((-len/2):(len/2-1))*df;
+fyaxis = -fxaxis;
+[FX,FY] = meshgrid(fxaxis,fyaxis);  %2-D arrays hold fx location and fy location of all points
+freq_rad = sqrt(FX.^2 + FY.^2);
+maxfreq = (len/2-1)*df;
+
+pupil_radius = 1.0*maxfreq; %NA / wavelength % 1.0*maxfreq; % radius of the pupil, inverse microns % (Hanser, 2004) doi.org/10.1111/j.0022-2720.2004.01393.x
+pupil_area = pi*pupil_radius^2; % pupil area
+pupil = double(freq_rad <= pupil_radius); % pin-hole
+
+idx2 = 5; % Defocus (diversity function) index of Zernike polynomials
+
+zd_dist = 3; % phase diversiy
+zd_list = (-zd_dist:zd_dist:zd_dist); % [-3, 0, 3]
+```
+
+### MPC Simulation
 ```matlab
 % Design matrix generation for Linear MPC
-[H, M1, M2, Q_tilda, R_tilda, B_conv, B_conv_pre1, B_conv_pre2, E] = MPC_DesignMatrices_v4(A1,A2,B,nx,nu,N,Q,P,R);
+[H, M1, M2, Q_tilda, R_tilda, B_conv, B_conv_pre1, B_conv_pre2, E] = MPC_DesignMatrices(A1,A2,B,nx,nu,N,Q,P,R);
 closed_form_matrix = -0.5*(pinv(H'*H))*(H');
 
+% MPC Simulation for T_final step
 U_acc = []; U_v_acc = []; dU_acc = []; X_acc = []; X_acc_err = [];
 X_err = zeros(T_final,N); X_est_err = []; X_err_low = []; X_err_high = [];
 ad_est_acc = []; ad_cor_acc = []; J = [];
@@ -375,7 +444,17 @@ u_prev = zeros(nu,1); Y_M_acc = [];
 ad_acc_valid = ad_acc(1+num_train+num_test:end,:);
 phase_valid = phase(:,:,1+num_train+num_test:end);
 
-
+for iSimStep = 1:T_final
+    tic
+    if iSimStep == 1
+        phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep);
+    else
+        % ramp constraint for first control input, u[0|k]
+        dU_min(1:nu,1) = du_min + u_prev;
+        dU_max(1:nu,1) = du_max + u_prev;
+        
+        phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep) + phase_cor(:,:,iSimStep-1);
+    end
 ```
 
 
