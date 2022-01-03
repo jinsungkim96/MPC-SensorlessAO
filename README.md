@@ -88,7 +88,14 @@ end
 ##  Model Identification based on Time-series method
 To determine the VAR model, any system identification method such as time-series, machine learning, and extrapolation can be used.
 In this study, we designed an AR model based on a time-series method.
+
+
 An open-loop wavefront dataset ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\{x_t[k]|k=1,\cdots,t_{\textrm{train}}%20\}) was used to identify the model parameters ![equation](https://latex.codecogs.com/gif.latex?%5Cinline%20A_i):
+
+The temporal dynamics of the Zernike coefficient $x_t$ constituting the time-varying phase aberration $\phi_{\textrm{distort}}$ can be represented by a vector-valued autoregressive (VAR) model of order N_v
+
+![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\begin{align*}x_t[k]%20&=%20f(x_t[k-1],\cdots,x_t[k-N_v],w[k])%20\\&=%20A_1%20x_t[k-1]%20+%20\cdots%20+%20A_{N_v}%20x_t[k-N_v]%20+%20w[k]\end{align*})
+
 ```matlab
 num_data = size(ad_acc,1);
 
