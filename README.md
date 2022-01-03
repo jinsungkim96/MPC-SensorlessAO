@@ -379,7 +379,7 @@ zd_dist = 3;
 zd_list = (-zd_dist:zd_dist:zd_dist); % [-3, 0, 3]; % phase diversity
 ```
 
-### MPC Simulation
+### MPC Simulation (Estimator + Controller)
 ```matlab
 % Design matrix generation for Linear MPC
 [H, M1, M2, Q_tilda, R_tilda, B_conv, B_conv_pre1, B_conv_pre2, E] = MPC_DesignMatrices(A1,A2,B,nx,nu,N,Q,P,R);
@@ -409,6 +409,63 @@ for iSimStep = 1:T_final
         
         phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep) + phase_cor(:,:,iSimStep-1);
     end
+    
+    % Estimator
+    Y_M = []; Y_M_noise = [];
+    
+    z = phase_res(:,:,iSimStep); % phase screen, unit : [m] (magnitude -1e-7 ~ -1e-7)
+    scrn = z;
+
+    for k=1:size(zd_list,2) %zd_list = -0.5:0.01:0.5 %-0.25:0.01:0.25 %-0.5:0.005:0.5 %-1:0.05:1
+        zd_diversity = zd_list(k);
+                        
+        kW = zd_diversity.*squeeze(Zs(idx2,:,:)); % [rad] 비교를 동일하게 해주기 위해 phase diversity를 사용
+        P_defocus = pupil.*exp(1i*(scrn+kW));
+
+        % transfer function
+        I_defocus = fftshift(fft2(fftshift(P_defocus),res,res))*dx^2;
+        im = abs(I_defocus).^2;
+        v_im(:,:,k) = im(range_min:range_max,range_min:range_max)*AU;
+        Y_M = [Y_M; reshape(v_im(:,:,k),(range_max-range_min+1)^2,1)];
+        
+        % Y_M_noise = [Y_M_noise; rand(diff^2,1)*mean(Y_M((k-1)*diff^2+1:k*diff^2,1))/SNR];
+    end
+    Y_M_noise = squeeze(SNR_data(sample,iSimStep,:));
+    
+    Y_M = Y_M + Y_M_noise;
+    Y_M_acc = [Y_M_acc; Y_M'];
+    
+    % ad_est = (A_s_est'*A_s_est)\(A_s_est)'*(Y_M-b_s_est); % ad_est = [0; (A_s'*A_s)\(A_s)'*(Y_M-b_s)];
+    ad_est = lsqminnorm((A_s_est'*A_s_est),((A_s_est)'*(Y_M-b_s_est)));
+    X_est_err = [X_est_err; norm(ad_est,2)];
+    
+    
+    % residual aberration에 대한 zernike coefficient
+    ad_est_acc = [ad_est_acc; ad_est'];
+    
+    % initial condition for MPC Controller
+    x0 = ad_est;
+    if iSimStep == 1
+        x0_pre = zeros(nx,1);
+    else
+        x0_pre = ad_est_acc(iSimStep-1,:)';
+    end
+    
+    %% b_ref generation
+    if iSimStep == 1
+        b_ref = zeros(N*nx,1);
+    elseif iSimStep == 2
+        b_ref = -M1*B*U_acc(iSimStep-1,:)';
+    else
+        b_ref = -M1*B*U_acc(iSimStep-1,:)' -M2*B*U_acc(iSimStep-2,:)';
+    end
+    
+    
+    %% r, c generation
+    r = 2*(B_conv)'*Q_tilda*(M1*x0 + M2*x0_pre + b_ref);
+    c = (M1*x0 + M2*x0_pre + b_ref)'*Q_tilda*(M1*x0 + M2*x0_pre + b_ref); % constant
+    
+    % Controller
 ```
 
 
