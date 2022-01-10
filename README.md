@@ -377,7 +377,7 @@ First, we define one based on the Taylor series expansion around zero aberration
 
 A vector representation of each pixel j for all phase diversities ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20i=1,\cdots,n_p) is given by
 
-![equation](y = b_s + A_s\alpha)
+![equation](https://latex.codecogs.com/png.image?\dpi{110}%20y%20=%20b_s%20+%20A_s\alpha).
 
 
 Then, the estimate of ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\alpha) is obtained by least squares:
