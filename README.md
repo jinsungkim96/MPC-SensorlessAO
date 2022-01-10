@@ -283,7 +283,7 @@ B(1,:) = []; A_s(:,1) = []; A_s_est(:,1) = []; ad_acc(:,1) = [];
 ```
 ### Setup the simulation parameters
 ``` matlab
-load("./model_approx.mat") % load first-order approximation model
+load("./model_approx.mat") % load the first-order approximation model of PSF
 load("./SNR_10.mat") % load measurement noise (SNR = 10 [dB])
 sample = 1;
 
@@ -295,45 +295,63 @@ mag_conv_20 = 3.174802103932926;
 phase = phase .* mag_conv_10;
 ad_acc = ad_acc .* mag_conv_10;
 
-% A = A'; % VAR(1) model
-A1 = A1'; % input_data에 저장된 A가 x*A 형태로 쓰였기 때문에 변환 필요
-A2 = A2';
+% Plot the magnitude of time-varying phase aberration used in the simulation.
+norm_ad = [];
+for i=1:size(ad_acc,1)
+    norm_ad(i,1) = norm(ad_acc(i,:));
+end
 
-% piston element is removed
-B(1,:) = []; A_s(:,1) = [];
+x1 = (1:num_train)*T_s_tur;
+x2 = (num_train:num_train+num_valid)*T_s_tur;
+x3 = (num_train+num_valid:num_train+num_valid+num_test)*T_s_tur;
+
+figure(51)
+hold on
+plot(x1,norm_ad(1:num_train,1),'r-','LineWidth',1.5)
+plot(x2,norm_ad(num_train:num_train+num_valid,1),'b-','LineWidth',1.5)
+plot(x3,norm_ad(num_train+num_valid:num_train+num_valid+num_test,1),'g-','LineWidth',1.5)
+hold off
+grid on
+xlim([1 size(norm_ad,1)]*T_s_tur)
+ylim([0 6])
+xlabel('Time [sec]')
+ylabel('Aberration Magnitde [rad]')
+legend('Training data','Validation data','Test data')
+set(gca,'FontSize',15)
+
+
+B(1,:) = []; A_s(:,1) = []; % piston element is removed
 
 nx = size(A1,1); % number of state
 nu = size(B,2); % number of input
 p = size(A_s,1); % number of measurements   
 
-n_mode = 6; % number of zernike modes
+n_mode = 6; % radial order of ernike modes
 N = 2; % prediction horizon for MPC
-T_final = 500; % size(phase,3) - num_train - num_test;
+T_final = 500; % num_test = size(phase,3) - num_train - num_valid;
 T_settle = 1.0e-3;
 T_s = 0.1e-3; % sampling time of MPC Simulation
-T_s_tur = 5e-3;
 
-%% J = U'*H*U + r'*U + c
+% Cost function : J = U'*H*U + r'*U + c
 Q = (1.5e+4)*eye(nx,nx); % weighting matrix for error state
 P = (1e+0)*Q; % weighting matrix for terminal error 
 R = (1e+0)*eye(nu,nu);% weighting matrix for cost function
 
-% SNR = 10; % the magnitude of desired SNR [db]
+% SNR = 10; % the magnitude of desired SNR [dB]
 
-coeff_a = 0.047275; coeff_b = 2.709264; coeff_c = 0; % Unit change parameters (Voltage to Deflection)
+coeff_a = 0.047275; coeff_b = 2.709264; coeff_c = 0; % Unit change parameters ( [V] → [nm] )
 
 u_min = -28*ones(nu,1); % input box constraint [rad]
-u_max = 28*ones(nu,1);  % 28 [rad] -> 200 [V]
+u_max = 28*ones(nu,1);  % 28 [rad] → 200 [V]
 
 du_min = -0.2121*ones(nu,1); % ramp-rate constraint [rad]
 du_max = 0.2121*ones(nu,1);
 
-U_min = repmat(u_min,N,1);
+U_min = repmat(u_min,N,1); % input box constraint for vector representation
 U_max = repmat(u_max,N,1);
 
-dU_min = repmat(du_min,N,1);
+dU_min = repmat(du_min,N,1); % ramp-rate constraint for vector representation
 dU_max = repmat(du_max,N,1);
-
 ```
 
 
