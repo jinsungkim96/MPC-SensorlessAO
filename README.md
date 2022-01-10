@@ -264,6 +264,7 @@ B = pinv(Zs_new'*Zs_new)*Zs_new'*B_pupil_new; % Influence matrix
 ```
 
 ##  Model Predictive Control Simulation
+
 ```matlab
 % The strength of atmospheric turbulence (D/r0) is magnified by 10, 15, 20.
 mag_conv_5 = 1;
@@ -370,6 +371,20 @@ zd_list = (-zd_dist:zd_dist:zd_dist); % [-3, 0, 3]
 ```
 
 ### MPC Simulation (Estimator + Controller)
+First, we define one based on the Taylor series expansion around zero aberration:
+
+![equation](https://latex.codecogs.com/png.image?\dpi{110}%20y_{i,j}%20=%20D_{0,j}(\beta_i)%20+%20D_{1,j}(\beta_i)\alpha%20+%20\mathcal{O}(\|\alpha\|^2)).
+
+A vector representation of each pixel j for all phase diversities ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20i=1,\cdots,n_p) is given by
+
+![equation](y = b_s + A_s\alpha)
+
+
+Then, the estimate of ![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\alpha) is obtained by least squares:
+
+![equation](https://latex.codecogs.com/png.image?\dpi{110}%20\hat{\alpha}%20:=%20{A^{\dagger}_s}(y-b_s))
+
+
 ```matlab
 % Design matrix generation for Linear MPC
 [H, M1, M2, Q_tilda, R_tilda, B_conv, B_conv_pre1, B_conv_pre2, E] = MPC_DesignMatrices(A1,A2,B,nx,nu,N,Q,P,R);
