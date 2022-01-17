@@ -29,7 +29,7 @@ To illustrate a complex environment such as the real-world atmosphere, we design
 ```matlab
 clear;clc;close all;
 addpath(genpath('.\OOMAO-master'));
-addpath('Fast_MPC/VAR_2'); % The VAR_1 and VAR_2 folders are fastMPC codes suitable for VAR(1) and VAR(2) models, respectively.
+addpath(genpath('.\Fast_MPC\VAR_2')); % The VAR_1 and VAR_2 folders are fastMPC codes suitable for VAR(1) and VAR(2) models, respectively.
 addpath(genpath('.\cvx'));
 cvx_setup
 
