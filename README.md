@@ -488,7 +488,129 @@ for iSimStep = 1:T_final
     r = 2*(B_conv)'*Q_tilda*(M1*x0 + M2*x0_pre + b_ref);
     c = (M1*x0 + M2*x0_pre + b_ref)'*Q_tilda*(M1*x0 + M2*x0_pre + b_ref); % constant
     
-    % Controller
+    %% Simulate MPC Opmizer (case_num : 1 = CVX, 2 = fmincon, 3 = fastMPC)
+    switch case_num
+        case 1
+            %% Solving MPC via CVX
+            tic
+            cvx_precision best % cvx precision settings - low, medium, default, high, best options are exist.
+            cvx_begin
+            cvx_solver SDPT3 % solver option : sedumi, mosek
+            variable U(nu*N,1)
+            subject to
+            %         F*U5 <= f; % linear constraints
+            U <= U_max; % input box constraints
+            U_min <= U;
+            E*U <= dU_max; % ramp-rate constraints
+            dU_min <= E*U;
+            minimize( (U)'*H*(U) + r'*(U) + c )
+            cvx_end
+            T_cvx(iSimStep,1) = toc;
+
+        case 2
+            %% Solving MPC via fmincon
+            fun = @(U6) (U6)'*H*(U6) + r'*(U6) + c; % objective function
+            Aieq = []; bieq = []; Aeq = []; beq = []; lb = []; ub = []; 
+            % lb = U_min; ub = U_max;
+            U0 = zeros(N*nu,1);
+
+            nonlcon = @mycon_uncon;
+
+            options = optimoptions(@fmincon,'Algorithm','interior-point','MaxIterations',1e+4,'MaxFunctionEvaluations',1e+5);
+            tic
+            U = fmincon(fun,U0,Aieq,bieq,Aeq,beq,lb,ub,nonlcon,options);
+            T_fmincon(iSimStep,1) = toc;
+
+        case 3
+            %% parameter setting
+            Xmax = 100;                  % State upper limit (arbitrary value for fastMPC)
+            x_min = -Xmax*ones(nx,1);     % State lower bound
+            x_max = Xmax*ones(nx,1);      % State upper bound
+            u_min = U_min(1:nu,1);     % Control lower bound
+            u_max = U_max(1:nu,1);      % Control upper bound
+            du_min = dU_min(1:nu,1); % Control ramp lower bound
+            du_max = dU_max(1:nu,1); % Control ramp upper bound
+
+            w = b_ref; % offset value for state equation
+            xf = [];  % Terminal state
+            test = Fast_MPC2(Q,R,[],Qf,[],[],[],x_min,x_max,u_min,u_max,du_min,du_max,N,x0,x0_pre,u_prev,A1,A2,B,w,xf,[]);   % Build class
+
+            %% Solve by mpc_fixed_log_newton (fixed log + fixed newton)
+            k_fix = 1e-2; % Fixed log barrier parameter (k=0.01)
+            n_fix = 1; % Fixed newton step (n=1)
+
+            tic;
+            [x_opt_lgnw] = test.mpc_fixed_log_newton(n_fix,k_fix);
+            T_lgnw(iSimStep,1) = toc;
+
+            x_lgnw = zeros(N*nx,1);
+            u_lgnw = zeros(N*nu,1);
+            for i=1:(nu+nx):length(x_opt_lgnw)
+                if i==1
+                    u_lgnw(i:i+nu-1) = x_opt_lgnw(i:i+nu-1);
+                    x_lgnw(i:i+nx-1) = x_opt_lgnw(i+nu:i+nu+nx-1);
+                else
+                    u_lgnw((i-1)/(nu+nx)*nu+1:(i-1)/(nu+nx)*nu+nu) = x_opt_lgnw(i:i+nu-1);
+                    x_lgnw((i-1)/(nu+nx)*nx+1:(i-1)/(nu+nx)*nx+nx) = x_opt_lgnw(i+nu:i+nu+nx-1);
+                end
+            end
+
+            U = u_lgnw;
+
+        otherwise
+            disp('other value')
+    end
+    
+    %% Unit change for input variable : [rad] → [V]
+    for i=1:size(U,1)
+        if U(i,1) < 0
+            U_v(i,1) = -( -coeff_b + sqrt((coeff_b)^2 - 4*coeff_a*U(i,1)*unit_change) )/(2*coeff_a);
+        else
+            U_v(i,1) = ( -coeff_b + sqrt((coeff_b)^2 + 4*coeff_a*U(i,1)*unit_change) )/(2*coeff_a);
+        end
+    end
+
+    U_v_acc = [U_v_acc; U_v(1:nu)'];
+    
+    %% Phase correction by DM 
+    J = [J; U'*H*U + r'*U + c]; % cost function
+    u_prev = U(1:nu,1); % u_prev = U(nu*(N-1)+1:nu*N,1);
+    ad_cor = B*u_prev;
+
+    X_predicted = M1*x0 + M2*x0_pre + B_conv*U + b_ref;
+
+    x_prev = X_predicted(1:nx,1);
+
+    Zs_cor = zeros(nx,len,len);
+    for j1=1:nx
+        Zs_cor(j1,:,:) = ad_cor(j1,1).*squeeze(Zs(j1+1,:,:)); % piston element is removed
+    end
+    Zs_cor = squeeze(sum(Zs_cor,1));
+    phase_cor(:,:,iSimStep) = Zs_cor;
+    
+    for i1=1:N
+        X_err(iSimStep,i1) = norm((X_predicted((i1-1)*nx+1:i1*nx,1)),2);
+    end
+
+    X_err_low = [X_err_low; norm(x_prev(1:nx,1))];
+    X_err_high = [X_err_high; norm(x_prev(nx+1:end,1))];
+
+
+    if iSimStep == 1
+        du_prev = u_prev - zeros(nu,1);
+    else
+        du_prev = u_prev - U_acc(iSimStep-1,:)';
+    end
+
+    ad_cor_acc = [ad_cor_acc; ad_cor'];
+    U_acc = [U_acc; u_prev'];
+    dU_acc = [dU_acc; du_prev'];
+
+    X_acc = [X_acc; x_prev'];
+    X_acc_err = [X_acc_err; norm(x_prev)];
+
+    T_sim(iSimStep,1) = toc;
+    disp(iSimStep)
 ```
 
 
