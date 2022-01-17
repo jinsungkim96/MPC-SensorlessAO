@@ -608,6 +608,7 @@ for iSimStep = 1:T_final % Simulation start (Estimator → Controller)
 
     T_sim(iSimStep,1) = toc;
     disp(iSimStep)
+end
 ```
 
 
