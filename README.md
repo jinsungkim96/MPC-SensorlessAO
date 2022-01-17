@@ -421,7 +421,7 @@ u_prev = zeros(nu,1); Y_M_acc = [];
 ad_acc_valid = ad_acc(1+num_train+num_test:end,:);
 phase_valid = phase(:,:,1+num_train+num_test:end);
 
-for iSimStep = 1:T_final
+for iSimStep = 1:T_final % Simulation start (Estimator → Controller)
     tic
     if iSimStep == 1
         phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep);
@@ -436,13 +436,12 @@ for iSimStep = 1:T_final
     % Estimator
     Y_M = []; Y_M_noise = [];
     
-    z = phase_res(:,:,iSimStep); % phase screen, unit : [m] (magnitude -1e-7 ~ -1e-7)
-    scrn = z;
+    scrn = phase_res(:,:,iSimStep); % phase screen, unit : [rad]
 
-    for k=1:size(zd_list,2) %zd_list = -0.5:0.01:0.5 %-0.25:0.01:0.25 %-0.5:0.005:0.5 %-1:0.05:1
-        zd_diversity = zd_list(k);
+    for k=1:size(zd_list,2)
+        zd_diversity = zd_list(k); % phase diversity value (-3, 0, 3)
                         
-        kW = zd_diversity.*squeeze(Zs(idx2,:,:)); % [rad] 비교를 동일하게 해주기 위해 phase diversity를 사용
+        kW = zd_diversity.*squeeze(Zs(idx2,:,:)); % diversity function
         P_defocus = pupil.*exp(1i*(scrn+kW));
 
         % transfer function
@@ -450,21 +449,15 @@ for iSimStep = 1:T_final
         im = abs(I_defocus).^2;
         v_im(:,:,k) = im(range_min:range_max,range_min:range_max)*AU;
         Y_M = [Y_M; reshape(v_im(:,:,k),(range_max-range_min+1)^2,1)];
-        
-        % Y_M_noise = [Y_M_noise; rand(diff^2,1)*mean(Y_M((k-1)*diff^2+1:k*diff^2,1))/SNR];
     end
     Y_M_noise = squeeze(SNR_data(sample,iSimStep,:));
     
     Y_M = Y_M + Y_M_noise;
     Y_M_acc = [Y_M_acc; Y_M'];
     
-    % ad_est = (A_s_est'*A_s_est)\(A_s_est)'*(Y_M-b_s_est); % ad_est = [0; (A_s'*A_s)\(A_s)'*(Y_M-b_s)];
-    ad_est = lsqminnorm((A_s_est'*A_s_est),((A_s_est)'*(Y_M-b_s_est)));
+    ad_est = lsqminnorm((A_s'*A_s),((A_s)'*(Y_M-b_s)));
     X_est_err = [X_est_err; norm(ad_est,2)];
-    
-    
-    % residual aberration에 대한 zernike coefficient
-    ad_est_acc = [ad_est_acc; ad_est'];
+    ad_est_acc = [ad_est_acc; ad_est']; % Zernike coefficient for residual aberration
     
     % initial condition for MPC Controller
     x0 = ad_est;
@@ -482,8 +475,7 @@ for iSimStep = 1:T_final
     else
         b_ref = -M1*B*U_acc(iSimStep-1,:)' -M2*B*U_acc(iSimStep-2,:)';
     end
-    
-    
+
     %% r, c generation
     r = 2*(B_conv)'*Q_tilda*(M1*x0 + M2*x0_pre + b_ref);
     c = (M1*x0 + M2*x0_pre + b_ref)'*Q_tilda*(M1*x0 + M2*x0_pre + b_ref); % constant
