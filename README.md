@@ -626,6 +626,6 @@ for iSimStep = 1:T_final % Simulation start (Estimator → Controller)
 
 [1]: https://arxiv.org/abs/--
 [2]: http://cvxr.com
-[3]:
+[3]: https://ieeexplore.ieee.org/abstract/document/5153127?casa_token=PAMJ_UCc-4kAAAAA:3egvBkuZYs_W2bujnvhyZ9xn5whiT0b4sp0Jt5CPjBPef0yaUOel5wWsiCc8xIZrcFpmWYs2Ots
 [4]: https://www.spiedigitallibrary.org/conference-proceedings-of-spie/9148/91486C/Object-oriented-Matlab-adaptive-optics-toolbox/10.1117/12.2054470.short
 [5]: https://www.osapublishing.org/josaa/abstract.cfm?uri=josaa-37-7-1083
