@@ -16,6 +16,7 @@ The block diagram for `Matlab` simulation is represented as follow.
 <img src="images/block_diagram.png" />
 
 Before implementing this MATLAB code, you must install the appropriate MPC optimizer such as ***CVX, fmincon, fastMPC***.
+
 ***CVX*** which is a MATLAB package for specifying and solving convex optimization problem can be executed through the *cvx_setup* command after installing the package provided in [[2]].
 ***fmincon*** is a built-in function provided by MATLAB and does not need to be installed separately.
 Lastly, ***fastMPC***, an algorithm that fixes the barrier parameters and Newton steps of the interior-point method, can be used to solve the resultant constrained optimal control problem in real time [[3]].
