@@ -420,25 +420,37 @@ closed_form_matrix = -0.5*(pinv(H'*H))*(H');
 U_acc = []; U_v_acc = []; dU_acc = []; X_acc = []; X_acc_err = [];
 X_err = zeros(T_final,N); X_est_err = []; X_err_low = []; X_err_high = [];
 ad_est_acc = []; ad_cor_acc = []; J = [];
-T_mldivide = zeros(T_final,1); T_pinv = zeros(T_final,1); T_lsqmin = zeros(T_final,1); T_geninv = zeros(T_final,1); T_cvx = zeros(T_final,1); T_fmincon = zeros(T_final,1); T_sim = zeros(T_final,1); 
+T_mldivide = zeros(T_final,1); T_pinv = zeros(T_final,1); T_lsqmin = zeros(T_final,1); T_geninv = zeros(T_final,1); T_cvx = zeros(T_final,1); T_fmincon = zeros(T_final,1); T_sim = zeros(T_final,1);
 
-phase_cor = zeros(len,len,T_final); % corrected aberration by DM
-phase_res = zeros(len,len,T_final); % residual aberration (phase_res = phase + phase_cor)
+phase_cor = zeros(len,len,T_final); % corrected phase aberration by DM
+phase_res = zeros(len,len,T_final); % residual phase aberration (phase_res = phase + phase_cor)
 u_prev = zeros(nu,1); Y_M_acc = [];
 
 ad_acc_valid = ad_acc(1+num_train+num_test:end,:);
 phase_valid = phase(:,:,1+num_train+num_test:end);
 
+case_num = input('Choose an optimizer: '); % case_num : 1 = CVX, 2 = fmincon, 3 = fastMPC
+if case_num == 1
+    disp('MPC Optimizer is CVX, a MATLAB package for convex optimization')
+elseif case_num == 2
+    disp('MPC Optimizer is fmincon which is built-in function in MATLAB')
+elseif case_num == 3
+    disp('MPC Optimizer is fastMPC which approximates the primal barrier method')
+else
+    disp('Wrong input!')
+end
+
+
 for iSimStep = 1:T_final % Simulation start (Estimator → Controller)
     tic
     if iSimStep == 1
-        phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep);
+        phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep); % For the first step, the corrected phase is none.
     else
-        % ramp constraint for first control input, u[0|k]
+        % ramp-rate constraint for first control input, u[0|k]
         dU_min(1:nu,1) = du_min + u_prev;
         dU_max(1:nu,1) = du_max + u_prev;
-        
-        phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep) + phase_cor(:,:,iSimStep-1);
+
+        phase_res(:,:,iSimStep) = phase_valid(:,:,iSimStep) + phase_cor(:,:,iSimStep-1); % residual phase
     end
     
     % Estimator
