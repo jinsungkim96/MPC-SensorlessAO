@@ -4,12 +4,22 @@ authors:
 - family-names: "Kim"
   given-names: "Jinsung"
   orcid: "https://orcid.org/0000-0002-5989-8391"
+- family-names: "Kye-Sung"
+  given-names: "Lee"
+- family-names: "Sang-Chul"
+  given-names: "Lee"
+- family-names: "Ji Yong"
+  given-names: "Bae"
+- family-names: "Dong Uk"
+  given-names: "Kim"
+- family-names: "I Jong"
+  given-names: "Kim"
+- family-names: "Ki Soo"
+  given-names: "Chang"
 - family-names: "Hur"
   given-names: "Hwan"
-  orcid: "https://orcid.org/0000-0000-0000-0000"
 title: "Model Predictive Control Simulation Package for Sensorless Adaptive Optics in MATLAB"
 version: 1.0.0
 month: 10
 year: 2021
 url: "https://github.com/jinsungkim96/MPC-SensorlessAO"
-date-released: 2021-10-22
