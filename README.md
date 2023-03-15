@@ -630,7 +630,7 @@ end
 
 
 ## References
-[[1]] Jinsung Kim, Kye-Sung Lee, Sang-Chul Lee, Ji Yong Bae, Dong Uk Kim, I Jong Kim, Ki Soo Chang and Hwan Hur. "Model Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Optics.", IEEE Transactions on Control Systems Technology, vol. 31, no. 2, pp. 786-796, March 2023, doi: 10.1109/TCST.2022.3205729.
+[[1]] Jinsung Kim, Kye-Sung Lee, Sang-Chul Lee, Ji Yong Bae, Dong Uk Kim, I Jong Kim, Ki Soo Chang and Hwan Hur. "Model Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Optics.", IEEE Transactions on Control Systems Technology, vol. 31, no. 2, pp. 786-796, March 2023.
 
 [[2]] Michael Grant and Stephen Boyd. CVX: Matlab software for disciplined convex programming, version 2.0 beta. http://cvxr.com/cvx, September 2013.
 
@@ -640,7 +640,7 @@ end
 
 [[5]] L. Prengere, C. Kulcs´ar, and H.-F. Raynaud, “Zonal-based highperformance control in adaptive optics systems with application to astronomy and satellite tracking,” J. Opt. Soc. Am. A, vol. 37, pp. 1083–1099, Jul 2020.
 
-[1]: https://arxiv.org/abs/--
+[1]: https://ieeexplore.ieee.org/document/9900112
 [2]: http://cvxr.com
 [3]: https://ieeexplore.ieee.org/abstract/document/5153127?casa_token=PAMJ_UCc-4kAAAAA:3egvBkuZYs_W2bujnvhyZ9xn5whiT0b4sp0Jt5CPjBPef0yaUOel5wWsiCc8xIZrcFpmWYs2Ots
 [4]: https://www.spiedigitallibrary.org/conference-proceedings-of-spie/9148/91486C/Object-oriented-Matlab-adaptive-optics-toolbox/10.1117/12.2054470.short
