@@ -630,7 +630,7 @@ end
 
 
 ## References
-[[1]] Jinsung Kim, Kye-Sung Lee, Sang-Chul Lee, Ji Yong Bae, Dong Uk Kim, I Jong Kim, Ki Soo Chang and Hwan Hur. "Model Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Optics", arXiv preprint. [https://arxiv.org/abs/--](https://arxiv.org/abs/--)
+[[1]] Jinsung Kim, Kye-Sung Lee, Sang-Chul Lee, Ji Yong Bae, Dong Uk Kim, I Jong Kim, Ki Soo Chang and Hwan Hur. "Model Model Predictive Control of Time-varying Aberrations for Sensorless Adaptive Optics.", IEEE Transactions on Control Systems Technology, vol. 31, no. 2, pp. 786-796, March 2023, doi: 10.1109/TCST.2022.3205729.
 
 [[2]] Michael Grant and Stephen Boyd. CVX: Matlab software for disciplined convex programming, version 2.0 beta. http://cvxr.com/cvx, September 2013.
 
